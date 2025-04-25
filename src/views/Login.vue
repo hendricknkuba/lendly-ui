@@ -28,8 +28,10 @@
       <div class="mt-8 pt-6 border-t border-dark-accent/20">
         <p class="text-text-muted text-center sm:text-left">
           Novo no Lendly?
-          <a href="#" class="text-accent hover:underline font-medium"
-            >Crie uma conta</a
+          <router-link
+            to="/register"
+            class="text-accent hover:underline font-medium"
+            >Crie uma conta</router-link
           >
         </p>
       </div>
