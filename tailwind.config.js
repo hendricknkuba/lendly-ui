@@ -11,11 +11,11 @@ module.exports = {
         'dark-secondary': '#121212',   // Container
         'dark-accent': '#1E1E1E',      // Bordas
         // Cores vibrantes (destaque financeiro)
-        'primary': '#7C3AED',          // Roxo intenso (confiança)
+        'primary': '#7C3AED',          
         'primary-hover': '#6D28D9',
-        'profit': '#10B981',           // Verde (lucro)
-        'loss': '#EF4444',             // Vermelho (perda)
-        'accent': '#3B82F6',           // Azul (ações)
+        'profit': '#10B981',           
+        'loss': '#EF4444',             
+        'accent': '#3B82F6',           
         // Texto
         'text-main': '#F9FAFB',
         'text-muted': '#D1D5DB',
