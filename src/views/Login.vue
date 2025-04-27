@@ -1,9 +1,9 @@
 <template>
   <div
-    class="min-h-screen flex items-center justify-center bg-dark-primary p-4 sm:p-6"
+    class="min-h-screen lg:w-xl flex items-center justify-center bg-dark-primary p-4 sm:p-6"
   >
     <div
-      class="w-full max-w-lg bg-dark-secondary rounded-xl p-8 sm:p-10 shadow-lg border border-dark-accent/30"
+      class="w-full max-w-2xl bg-dark-secondary rounded-xl p-8 sm:p-12 shadow-lg border border-dark-accent/30"
     >
       <h1 class="text-3xl sm:text-4xl font-bold text-left mb-8 text-primary">
         Lendly
