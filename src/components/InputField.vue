@@ -11,7 +11,7 @@
       :placeholder="placeholder"
       :value="modelValue"
       @input="$emit('update:modelValue', $event.target.value)"
-      @blur="$emit('blur')"
+      @blur="$emit('blur', $event)"
       class="w-full bg-dark-accent border border-dark-accent/50 rounded-lg px-4 py-3 text-text-main focus:outline-none focus:ring-2 focus:ring-primary"
       :class=" error ? 'border-loss' : 'border-dark-accent/50'"
     />
