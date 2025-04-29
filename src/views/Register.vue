@@ -1,9 +1,9 @@
 <template>
   <div
-    class="min-h-screen flex items-center justify-center bg-dark-primary p-4 sm:p-6"
+    class="min-h-screen lg:w-xl flex items-center justify-center bg-dark-primary p-4 sm:p-6"
   >
     <div
-      class="w-full max-w-lg bg-dark-secondary rounded-xl p-8 sm:p-10 shadow-lg border border-dark-accent/30"
+      class="w-full max-w-2xl bg-dark-secondary rounded-xl p-8 sm:p-12 shadow-lg border border-dark-accent/30"
     >
       <!-- Cabeçalho -->
       <div class="mb-8">
@@ -20,8 +20,8 @@
           type="text"
           placeholder="Seu nome"
           v-model="form.name"
-          @blur="v$.name.$touch()"
-          :error="v$.name.$errors[0]?.$message"
+          @blur="handleBlur('name')"
+          :error="nameError"
         />
 
         <InputField
@@ -29,8 +29,8 @@
           type="email"
           placeholder="exemplo@lendly.com"
           v-model="form.email"
-          @blur="v$.name.$touch()"
-          :error="v$.email.$errors[0]?.$message"
+          @blur="handleBlur('email')"
+          :error="emailError"
         />
 
         <InputField
@@ -38,10 +38,14 @@
           type="password"
           placeholder="••••••••"
           v-model="form.password"
-          @blur="v$.name.$touch()"
-          :error="v$.password.$errors[0]?.$message"
+          @blur="handleBlur('password')"
+          :error="passwordError"
         />
-        <Button primary class="w-full mt-4 py-3" :disabled="v$.$invalid && v$.$autoDirty">
+        <Button
+          primary
+          class="w-full mt-4 py-3"
+          :disabled="v$.$invalid && v$.$autoDirty"
+        >
           <span v-if="!isLoading">Registrar</span>
           <span v-else>Carregando...</span>
         </Button>
@@ -74,26 +78,42 @@ import Button from "../components/Button.vue";
 import InputField from "../components/InputField.vue";
 import { useVuelidate } from "@vuelidate/core";
 import { required, email, minLength, maxLength } from "@vuelidate/validators";
-import { ref, reactive } from "vue";
+import { ref, reactive, computed } from "vue";
 import { useRouter } from "vue-router";
 import { register } from "../services/auth";
+import { helpers } from "@vuelidate/validators";
 
 const isLoading = ref(false);
 const router = useRouter();
 const error = ref("");
 const success = ref(false);
 const rules = {
-  email: { required, email },
   name: {
-    required,
-    minLength: minLength(3),
-    maxLength: maxLength(50),
+    required: helpers.withMessage("O nome é obrigatório", required),
+    minLength: helpers.withMessage("Mínimo 3 caracteres", minLength(3)),
+    hasUpperCase: helpers.withMessage(
+      "Deve conter pelo menos 1 letra maiúscula",
+      (value) => /[A-Z]/.test(value)
+    ),
+  },
+  email: {
+    required: helpers.withMessage("O e-mail é obrigatório", required),
+    email: helpers.withMessage("Digite um e-mail válido", email),
   },
   password: {
-    required,
-    minLength: minLength(6),
-    containsUppercase: (value) => /[A-Z]/.test(value),
-    containsNumber: (value) => /[0-9]/.test(value),
+    required: helpers.withMessage("A senha é obrigatória", required),
+    minLength: helpers.withMessage("Mínimo 8 caracteres", minLength(8)),
+    hasUpperCase: helpers.withMessage(
+      "Deve conter 1 letra maiúscula",
+      (value) => /[A-Z]/.test(value)
+    ),
+    hasNumber: helpers.withMessage("Deve conter 1 número", (value) =>
+      /[0-9]/.test(value)
+    ),
+    hasSpecialChar: helpers.withMessage(
+      "Deve conter 1 caractere especial (!@#$%^&*)",
+      (value) => /[!@#$%^&*]/.test(value)
+    ),
   },
 };
 const form = reactive({
@@ -102,8 +122,24 @@ const form = reactive({
   password: "",
 });
 
-const v$ = useVuelidate(rules, form, { $autoDirty: true});
-console.log(v$.$invalid);
+const v$ = useVuelidate(rules, form, { $autoDirty: true });
+
+const handleBlur = (field) => {
+  if (v$.value && v$.value[field]) {
+    v$.value[field].$touch();
+  }
+};
+const nameError = computed(() => {
+  return v$.value?.name?.$errors[0]?.$message || "";
+});
+
+const emailError = computed(() => {
+  return v$.value?.email?.$errors[0]?.$message || "";
+});
+
+const passwordError = computed(() => {
+  return v$.value?.password?.$errors[0]?.$message || "";
+});
 
 const handleRegister = async () => {
   isLoading.value = true;
@@ -124,10 +160,6 @@ const handleRegister = async () => {
 
 const submit = async () => {
   const isValid = await v$.value.$validate();
-  if (!isValid) {
-    console.log("Validação falhou");
-    return;
-  }
   handleRegister();
 };
 </script>
