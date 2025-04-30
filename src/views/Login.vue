@@ -14,14 +14,31 @@
           label="Email"
           type="email"
           placeholder="exemplo@lendly.com"
+          v-model="form.email"
+          @blur="handleBlur('email')"
+          :error="emailError"
         />
-        <InputField label="Senha" type="password" placeholder="••••••••" />
+        <InputField
+          label="Senha"
+          type="password"
+          placeholder="••••••••"
+          v-model="form.password"
+          @blur="handleBlur('password')"
+          :error="passwordError"
+        />
 
         <div class="flex justify-between items-center">
           <a href="#" class="text-accent hover:underline text-sm"
             >Esqueceu a senha?</a
           >
-          <Button primary class="px-8"> Entrar </Button>
+          <Button
+            primary
+            class="px-8"
+            :disabled="v$.$invalid && v$.$autoDirty"
+            :isLoading="isLoading"
+          >
+            Entrar
+          </Button>
         </div>
       </form>
 
@@ -42,8 +59,56 @@
 <script setup>
 import Button from "../components/Button.vue";
 import InputField from "../components/InputField.vue";
+import { login } from "../services/auth";
+import { helpers } from "@vuelidate/validators";
+import { required, email, minLength } from "@vuelidate/validators";
+import { ref, reactive, computed } from "vue";
+import { useVuelidate } from "@vuelidate/core";
 
-const handleLogin = () => {
-  // Lógica de login aqui
+const isLoading = ref(false);
+const rules = {
+  email: {
+    required: helpers.withMessage("O e-mail é obrigatório", required),
+    email: helpers.withMessage("Digite um e-mail válido", email),
+  },
+  password: {
+    required: helpers.withMessage("A senha é obrigatória", required),
+    minLength: helpers.withMessage("Mínimo 8 caracteres", minLength(8)),
+  },
+};
+const form = reactive({
+  email: "",
+  password: "",
+});
+
+const v$ = useVuelidate(rules, form, { $autoDirty: true });
+
+const handleBlur = (field) => {
+  if (v$.value && v$.value[field]) {
+    v$.value[field].$touch();
+  }
+};
+
+const emailError = computed(() => {
+  return v$.value?.email?.$errors[0]?.$message || "";
+});
+
+const passwordError = computed(() => {
+  return v$.value?.password?.$errors[0]?.$message || "";
+});
+
+const handleLogin = async () => {
+  isLoading.value = true;
+  try {
+    const response = await login(form);
+    console.log("Login bem sucedido: ", response);
+    setTimeout(() => {
+      alert("Redireciona!");
+    }, 2000);
+  } catch (err) {
+    console.error("Erro ao fazer login: ", err);
+  } finally {
+    isLoading.value = false;
+  }
 };
 </script>
