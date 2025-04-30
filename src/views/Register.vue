@@ -45,6 +45,7 @@
           primary
           class="w-full mt-4 py-3"
           :disabled="v$.$invalid && v$.$autoDirty"
+          :loading="isLoading"
         >
           <span v-if="!isLoading">Registrar</span>
           <span v-else>Carregando...</span>
@@ -77,15 +78,15 @@
 import Button from "../components/Button.vue";
 import InputField from "../components/InputField.vue";
 import { useVuelidate } from "@vuelidate/core";
-import { required, email, minLength, maxLength } from "@vuelidate/validators";
+import { required, email, minLength } from "@vuelidate/validators";
 import { ref, reactive, computed } from "vue";
 import { useRouter } from "vue-router";
 import { register } from "../services/auth";
 import { helpers } from "@vuelidate/validators";
 
 const isLoading = ref(false);
-const router = useRouter();
 const error = ref("");
+const router = useRouter();
 const success = ref(false);
 const rules = {
   name: {
@@ -129,6 +130,7 @@ const handleBlur = (field) => {
     v$.value[field].$touch();
   }
 };
+
 const nameError = computed(() => {
   return v$.value?.name?.$errors[0]?.$message || "";
 });
@@ -143,23 +145,26 @@ const passwordError = computed(() => {
 
 const handleRegister = async () => {
   isLoading.value = true;
+  const isValid = await v$.value.$validate();
+  if (!isValid) return;
+
   error.value = "";
+
   try {
     const response = await register(form);
     console.log("Registro bem sucedido: ", response);
-
     success.value = true;
     setTimeout(() => {
-      alert("Redireciona após 2s");
+      router.push("/login");
     }, 2000);
   } catch (err) {
     console.error("Erro ao registrar: ", err);
+  } finally {
+    isLoading.value = false;
   }
-  isLoading.value = false;
 };
 
 const submit = async () => {
-  const isValid = await v$.value.$validate();
   handleRegister();
 };
 </script>
